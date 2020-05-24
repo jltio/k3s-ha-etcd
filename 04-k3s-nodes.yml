@@ -1,0 +1,6 @@
+---
+- hosts:
+    - k3s_nodes
+  roles:
+    - docker
+    - k3s/node

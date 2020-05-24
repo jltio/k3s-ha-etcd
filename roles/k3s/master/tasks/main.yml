@@ -1,0 +1,34 @@
+---
+- name: Copy k3s-master.service file
+  template:
+    src: k3s-master.service
+    dest: /etc/systemd/system/k3s-master.service
+    owner: root
+    group: root
+    mode: 0644
+  notify:
+    - Restart k3s-master
+
+- name: Reload systemd
+  systemd:
+    daemon_reload: yes
+
+- name: Enable and start k3s-master service (cluster init)
+  systemd:
+    name: k3s-master
+    state: started
+    enabled: yes
+  run_once: true
+  delegate_to: "{{ groups['k3s_masters'][0] }}"
+
+- name: Wait for token
+  wait_for:
+    path: /var/lib/rancher/k3s/server/token
+  run_once: true
+  delegate_to: "{{ groups['k3s_masters'][0] }}"
+
+- name: Enable and start k3s-master service
+  systemd:
+    name: k3s-master
+    state: started
+    enabled: yes

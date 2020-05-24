@@ -1,0 +1,15 @@
+---
+# Uniquement pour le gathering
+- hosts:
+    - etcd
+
+- hosts:
+    - k3s_masters
+    - k3s_nodes
+  roles:
+    - k3s/common
+
+- hosts:
+    - k3s_masters
+  roles:
+    - k3s/master

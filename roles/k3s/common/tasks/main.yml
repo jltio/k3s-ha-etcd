@@ -1,0 +1,25 @@
+---
+- name: Download k3s binary
+  get_url:
+    url: https://github.com/rancher/k3s/releases/download/{{ k3s_version }}/k3s
+    dest: /usr/local/bin/k3s
+    owner: root
+    group: root
+    mode: 0755
+
+- name: Create kubectl symlink
+  file:
+    src: /usr/local/bin/k3s
+    dest: /usr/local/bin/kubectl
+    state: link
+
+- name: Create /var/lib/rancher and /etc/rancher directories
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: root
+    group: root
+    mode: 0755
+  loop:
+    - /var/lib/rancher
+    - /etc/rancher

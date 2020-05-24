@@ -1,0 +1,60 @@
+---
+- hosts:
+    - k3s_nodes
+
+  tasks:
+  - name: Stop services
+    systemd:
+      name: "{{ item }}"
+      state: stopped
+    loop:
+      - docker
+      - k3s-node
+
+  - name: Delete data
+    file:
+      path: "{{ item }}"
+      state: absent
+    loop:
+      - /etc/rancher
+      - /var/lib/rancher
+
+- hosts:
+    - k3s_masters
+
+  tasks:
+  - name: Stop services
+    systemd:
+      name: "{{ item }}"
+      state: stopped
+    loop:
+      - k3s-master
+
+  - name: Delete data
+    file:
+      path: "{{ item }}"
+      state: absent
+    loop:
+      - /etc/rancher
+      - /var/lib/rancher
+
+- hosts:
+    - etcd
+
+  tasks:
+  - name: Stop services
+    systemd:
+      name: "{{ item }}"
+      state: stopped
+    loop:
+      - etcd
+
+  - name: Delete data
+    file:
+      path: "{{ item }}"
+      state: absent
+    loop:
+      - /etc/ssl/etcd
+      - /etc/etcd
+      - /var/lib/etcd
+

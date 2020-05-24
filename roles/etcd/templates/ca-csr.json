@@ -1,0 +1,14 @@
+{
+    "CN": "ectd",
+    "key": {
+        "algo": "rsa",
+        "size": 2048
+    },
+    "names": [
+        {
+            "C": "FR",
+            "ST": "HDF",
+            "L": "LILLE"
+        }
+    ]
+}

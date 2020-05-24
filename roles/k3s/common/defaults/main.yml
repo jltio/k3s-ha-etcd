@@ -1,0 +1,4 @@
+---
+k3s_version: v1.17.5+k3s1
+
+etcd_cluster_urls: "{% for host in groups.etcd %}https://{{ hostvars[host].ansible_default_ipv4.address }}:2379,{% endfor %}"

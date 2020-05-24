@@ -1,0 +1,32 @@
+---
+- name: Download etcd
+  get_url:
+    url: "{{ etcd_url }}/v{{ etcd_version }}/etcd-v{{ etcd_version }}-linux-amd64.tar.gz"
+    dest: /tmp/etcd-v{{ etcd_version }}-linux-amd64.tar.gz
+    mode: 0444
+
+- name: Extract etcd
+  unarchive:
+    src: /tmp/etcd-v{{ etcd_version }}-linux-amd64.tar.gz
+    dest: /tmp
+    remote_src: yes
+
+- name: Copy etcd binaries in /usr/local/bin
+  copy:
+    src: /tmp/etcd-v{{ etcd_version }}-linux-amd64/{{ item }}
+    dest: /usr/local/bin/{{ item }}
+    remote_src: yes
+    owner: root
+    group: root
+    mode: "0755"
+  loop:
+    - etcd
+    - etcdctl
+
+- name: Clean files downloaded
+  file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - /tmp/etcd-v{{ etcd_version }}-linux-amd64.tar.gz
+    - /tmp/etcd-v{{ etcd_version }}-linux-amd64

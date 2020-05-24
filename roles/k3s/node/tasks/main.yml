@@ -1,0 +1,35 @@
+---
+- name: Read token from master
+  slurp:
+    src: /var/lib/rancher/k3s/server/token
+  register: token
+  run_once: true
+  delegate_to: "{{ groups['k3s_masters'][0] }}"
+
+- name: Copy token on all nodes
+  copy:
+    content: "{{ token.content | b64decode | trim }}"
+    dest: /etc/rancher/token
+    owner: root
+    group: root
+    mode: "0600"
+
+- name: Copy k3s service file
+  template:
+    src: k3s-node.service
+    dest: /etc/systemd/system/k3s-node.service
+    owner: root
+    group: root
+    mode: 0644
+  notify:
+    - Restart k3s-node
+
+- name: Reload systemd
+  systemd:
+    daemon_reload: yes
+
+- name: Enable and start k3s-node service
+  systemd:
+    name: k3s-node
+    state: started
+    enabled: yes

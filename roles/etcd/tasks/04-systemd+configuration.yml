@@ -1,0 +1,30 @@
+---
+- name: Create etcd file configuration
+  template:
+    src: etcd.conf
+    dest: /etc/etcd/etcd.conf
+    owner: etcd
+    group: etcd
+    mode: "0644"
+  notify:
+    - Restart etcd
+
+- name: Create etcd systemd file
+  template:
+    src: etcd.service
+    dest: /etc/systemd/system/etcd.service
+    owner: root
+    group: root
+    mode: "0644"
+  notify:
+    - Restart etcd
+
+- name: Reload systemd
+  systemd:
+    daemon_reload: yes
+
+- name: Enable and start etcd service
+  systemd:
+    name: etcd
+    state: started
+    enabled: yes

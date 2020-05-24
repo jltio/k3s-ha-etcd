@@ -1,0 +1,24 @@
+---
+- name: Create etcd group
+  group:
+    name: etcd
+    system: yes
+
+- name: Create etcd user
+  user:
+    name: etcd
+    group: etcd
+    home: /var/lib/etcd
+    create_home: no
+    system: yes
+
+- name: Create /var/lib/etcd and /etc/ectd directories
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: etcd
+    group: etcd
+    mode: 0755
+  loop:
+    - /var/lib/etcd
+    - /etc/etcd

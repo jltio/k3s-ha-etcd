@@ -1,0 +1,37 @@
+---
+- name: Install Haproxy and keepalived
+  yum:
+    name:
+      - haproxy
+      - keepalived
+    state: present
+
+- name: Copy haproxy.cfg
+  template:
+    src: haproxy.cfg
+    dest: /etc/haproxy/haproxy.cfg
+    owner: root
+    group: root
+    mode: "0644"
+  notify:
+    - Restart haproxy
+
+- name: Copy keepalived.conf
+  template:
+    src: keepalived.conf
+    dest: /etc/keepalived/keepalived.conf
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Enable and start haproxy service
+  systemd:
+    name: haproxy
+    state: started
+    enabled: yes
+
+- name: Enable and start keepalived service
+  systemd:
+    name: keepalived
+    state: started
+    enabled: yes

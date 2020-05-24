@@ -1,0 +1,8 @@
+---
+etcd_url: https://github.com/etcd-io/etcd/releases/download
+etcd_version: 3.4.8
+etcd_cluster_urls: "{% for host in groups.etcd %}{{ host }}=https://{{ hostvars[host].ansible_default_ipv4.address }}:2380,{% endfor %}"
+etcd_cluster_hosts: "{% for host in groups.etcd %}{{ hostvars[host].ansible_default_ipv4.address }},{% endfor %}"
+
+cfssl_url: https://github.com/cloudflare/cfssl/releases/download
+cfssl_version: 1.4.1

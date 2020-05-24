@@ -1,0 +1,103 @@
+---
+# Uniquement sur le premier node etcd
+- name: Download cfssl and cfssljson binaries
+  get_url:
+    url: "{{ cfssl_url }}/v{{ cfssl_version }}/{{ item }}_{{ cfssl_version }}_linux_amd64"
+    dest: /usr/local/bin/{{ item }}
+    mode: 0755
+  loop:
+    - cfssl
+    - cfssljson
+  run_once: true
+  delegate_to: "{{ groups['etcd'][0] }}"
+
+- name: Create /etc/ssl/etcd directory
+  file:
+    path: /etc/ssl/etcd
+    state: directory
+  run_once: true
+  delegate_to: "{{ groups['etcd'][0] }}"
+
+- name: Copy ca-csr.json and config.json
+  template:
+    src: "{{ item }}"
+    dest: /etc/ssl/etcd/{{ item }}
+  loop:
+    - config.json
+    - ca-csr.json
+  run_once: true
+  delegate_to: "{{ groups['etcd'][0] }}"
+
+- name: Generate CA
+  shell: /usr/local/bin/cfssl genkey -initca ca-csr.json | /usr/local/bin/cfssljson -bare ca
+  args:
+    chdir: /etc/ssl/etcd
+    creates: /etc/ssl/etcd/ca-key.pem
+  run_once: true
+  delegate_to: "{{ groups['etcd'][0] }}"
+
+- name: Copy node-csr.json
+  template:
+    src: node-csr.json
+    dest: /etc/ssl/etcd/node-csr.json
+  run_once: true
+  delegate_to: "{{ groups['etcd'][0] }}"
+
+- name: Generate certificat for all nodes
+  shell: /usr/local/bin/cfssl gencert \
+         -config=config.json \
+         -ca=ca.pem \
+         -ca-key=ca-key.pem \
+         -profile=etcd
+         -hostname={{ etcd_cluster_hosts | trim(',') }},127.0.0.1 \
+         node-csr.json | /usr/local/bin/cfssljson -bare node
+  args:
+    chdir: /etc/ssl/etcd
+    creates: /etc/ssl/etcd/node-key.pem
+  delegate_to: "{{ groups['etcd'][0] }}"
+
+# Dispatch des certificats vers les autres nodes
+- name: Slurp /etc/ssl/etcd/ca.pem
+  slurp:
+    src: /etc/ssl/etcd/ca.pem
+  register: ca_pem
+  run_once: true
+  delegate_to: "{{ groups['etcd'][0] }}"
+
+- name: Copy ca.pem on all nodes
+  copy:
+    content: "{{ ca_pem.content | b64decode }}"
+    dest: /etc/etcd/ca.pem
+    owner: etcd
+    group: etcd
+    mode: "0644"
+
+- name: Slurp /etc/ssl/etcd/node-key.pem
+  slurp:
+    src: /etc/ssl/etcd/node-key.pem
+  register: node_key_pem
+  run_once: true
+  delegate_to: "{{ groups['etcd'][0] }}"
+
+- name: Copy node-key.pem on all nodes
+  copy:
+    content: "{{ node_key_pem.content | b64decode }}"
+    dest: /etc/etcd/node-key.pem
+    owner: etcd
+    group: etcd
+    mode: "0600"
+
+- name: Slurp /etc/ssl/etcd/node.pem
+  slurp:
+    src: /etc/ssl/etcd/node.pem
+  register: node_pem
+  run_once: true
+  delegate_to: "{{ groups['etcd'][0] }}"
+
+- name: Copy node.pem on all nodes
+  copy:
+    content: "{{ node_pem.content | b64decode }}"
+    dest: /etc/etcd/node.pem
+    owner: etcd
+    group: etcd
+    mode: "0644"

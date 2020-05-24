@@ -1,0 +1,10 @@
+---
+# Uniquement pour le gathering
+- hosts:
+    - k3s_masters
+    - k3s_nodes
+
+- hosts:
+    - haproxy
+  roles:
+    - haproxy

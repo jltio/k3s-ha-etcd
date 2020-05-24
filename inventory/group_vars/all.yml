@@ -1,0 +1,2 @@
+haproxy_vip: 192.168.122.254
+haproxy_vip_netmask: 192.168.122.255

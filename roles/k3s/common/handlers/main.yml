@@ -1,0 +1,10 @@
+---
+- name: Restart k3s-master
+  service:
+    name: k3s-master
+    state: restarted
+
+- name: Restart k3s-node
+  service:
+    name: k3s-node
+    state: restarted
