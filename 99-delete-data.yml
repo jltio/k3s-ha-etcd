@@ -29,6 +29,9 @@
       state: stopped
     loop:
       - k3s-master
+      - kube-apiserver
+      - kube-scheduler
+      - kube-controller-manager
 
   - name: Delete data
     file:
@@ -37,6 +40,8 @@
     loop:
       - /etc/rancher
       - /var/lib/rancher
+      - /etc/kubernetes
+      - /var/lib/kubelet
 
 - hosts:
     - etcd

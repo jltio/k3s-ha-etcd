@@ -1,0 +1,50 @@
+---
+- name: Check if k8S if installed
+  shell: test -x /usr/local/bin/kube-apiserver && /usr/local/bin/kube-apiserver --version | cut -d" " -f2 || exit 0
+  register: check_k8s_version
+
+- block:
+
+  - name: Download k8s binaries
+    get_url:
+      url: https://dl.k8s.io/{{ k8s_version }}/kubernetes-server-linux-amd64.tar.gz
+      dest: /tmp/kubernetes-server-linux-amd64.tar.gz
+      owner: root
+      group: root
+      mode: 0755
+
+  - name: Extract archive
+    unarchive:
+      src: /tmp/kubernetes-server-linux-amd64.tar.gz
+      dest: /tmp
+      remote_src: yes
+
+  - name: Install binaries in /usr/local/bin
+    copy:
+      src: /tmp/kubernetes/server/bin/{{ item }}
+      dest: /usr/local/bin/{{ item }}
+      owner: root
+      group: root
+      mode: "0755"
+      remote_src: yes
+    loop:
+      - kube-apiserver
+      - kube-controller-manager
+      - kube-scheduler
+      - kubeadm
+      - kubectl
+      - kubelet
+      - kube-proxy
+
+  # TODO: Clean
+
+  when:
+    - check_k8s_version.stdout != k8s_version
+
+- name: Create /etc/kubernetes directory
+  file:
+    path: /etc/kubernetes/pki
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"

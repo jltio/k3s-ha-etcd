@@ -1,0 +1,15 @@
+---
+- name: Restart kube-apiserver
+  service:
+    name: kube-apiserver
+    state: restarted
+
+- name: Restart kube-scheduler
+  service:
+    name: kube-scheduler
+    state: restarted
+
+- name: Restart kube-controller-manager
+  service:
+    name: kube-controller-manager
+    state: restarted

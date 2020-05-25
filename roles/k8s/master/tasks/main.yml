@@ -1,0 +1,130 @@
+---
+# Generation SSL
+- name: Generate certificats
+  shell: /usr/local/bin/kubeadm init phase certs {{ item }}
+  args:
+    chdir: /etc/kubernetes/pki
+    creates: /etc/kubernetes/pki/{{ item }}.key
+  loop:
+    - ca
+    - apiserver-kubelet-client
+    - front-proxy-ca
+    - front-proxy-client
+    - sa
+  run_once: true
+  delegate_to: "{{ groups['k8s_masters'][0] }}"
+
+- name: Generate certificats SANS
+  shell: /usr/local/bin/kubeadm init phase certs {{ item }} --apiserver-cert-extra-sans {{ certificat_apiserver_extra_sans | trim(",") }},{{ haproxy_vip }},127.0.0.1
+  args:
+    chdir: /etc/kubernetes/pki
+    creates: /etc/kubernetes/pki/{{ item }}.key
+  loop:
+    - apiserver
+  run_once: true
+  delegate_to: "{{ groups['k8s_masters'][0] }}"
+
+# Generation fichiers config
+- name: Generate configurations
+  shell: /usr/local/bin/kubeadm init phase kubeconfig {{ item }} --control-plane-endpoint 127.0.0.1:6443
+  args:
+    chdir: /etc/kubernetes
+    creates: /etc/kubernetes/{{ item }}.conf
+  loop:
+    - admin
+    - scheduler
+    - controller-manager
+  run_once: true
+  delegate_to: "{{ groups['k8s_masters'][0] }}"
+
+# Syncro fichiers
+- name: Slurp certificates from /etc/kubernetes/pki
+  slurp:
+    src: /etc/kubernetes/pki/{{ item }}
+  loop:
+    - ca.crt
+    - ca.key
+    - apiserver.key
+    - apiserver.crt
+    - apiserver-kubelet-client.crt
+    - apiserver-kubelet-client.key
+    - front-proxy-ca.crt
+    - front-proxy-ca.key
+    - front-proxy-client.crt
+    - front-proxy-client.key
+    - sa.key
+    - sa.pub
+  register: certificates
+  run_once: true
+  delegate_to: "{{ groups['k8s_masters'][0] }}"
+
+- name: Copy certificates on all nodes
+  copy:
+    content: "{{ item.content | b64decode }}"
+    dest: /etc/kubernetes/pki/{{ item.item }}
+    owner: root
+    group: root
+    mode: "0644"
+  with_items: "{{ certificates.results }}"
+
+- name: Slurp configurations from /etc/kubernetes
+  slurp:
+    src: /etc/kubernetes/{{ item }}.conf
+  loop:
+    - admin
+    - scheduler
+    - controller-manager
+  register: configurations
+  run_once: true
+  delegate_to: "{{ groups['k8s_masters'][0] }}"
+
+- name: Copy configurations on all nodes
+  copy:
+    content: "{{ item.content | b64decode }}"
+    dest: /etc/kubernetes/{{ item.item }}.conf
+    owner: root
+    group: root
+    mode: "0644"
+  with_items: "{{ configurations.results }}"
+
+- name: Copy services file
+  template:
+    src: "{{ item }}.service"
+    dest: /etc/systemd/system/{{ item }}.service
+    owner: root
+    group: root
+    mode: 0644
+  loop:
+    - kube-apiserver
+    - kube-scheduler
+    - kube-controller-manager
+  notify:
+    - Restart kube-apiserver
+    - Restart kube-scheduler
+    - Restart kube-controller-manager
+
+- name: Reload systemd
+  systemd:
+    daemon_reload: yes
+
+- name: Enable and start kubernetes services (cluster init)
+  systemd:
+    name: "{{ item }}"
+    state: started
+    enabled: yes
+  loop:
+    - kube-apiserver
+    - kube-scheduler
+    - kube-controller-manager
+  run_once: true
+  delegate_to: "{{ groups['k8s_masters'][0] }}"
+
+- name: Enable and start kubernetes services (all servers)
+  systemd:
+    name: "{{ item }}"
+    state: started
+    enabled: yes
+  loop:
+    - kube-apiserver
+    - kube-scheduler
+    - kube-controller-manager
