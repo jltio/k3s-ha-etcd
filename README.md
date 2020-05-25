@@ -47,11 +47,17 @@ Dans k3s, la gestion des certificats TLS se gère automatiquement.
 
 ## Lancement des Playbooks Ansible
 
-Ce projet fonctionne sur Ansible version 2.9
+Ce projet fonctionne sur **Ansible version 2.9**
 
 Avant de lancer, se connecter sur les 8 serveurs via SSH avec une clé SSH ne demandant pas de mot de passe (sans passphrase ou ssh-agent)
 
-Fonctionne uniquement sur CentOS 7
+Fonctionne uniquement sur **CentOS 7**
+
+### Préparation de l'inventaire
+
+Adapter le fichier `inventory/inventory.ini` pour y mettre les bonnes adresse IP. Changer aussi le fichier `inventory/group_vars/all.yml` pour mettre l'adresse IP virtuelle d'Haproxy.
+
+Lancer le premier playbook
 
 ```bash
 ansible-playbook 00-prereq.yml
