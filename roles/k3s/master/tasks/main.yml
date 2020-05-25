@@ -5,7 +5,7 @@
     dest: /etc/systemd/system/k3s-master.service
     owner: root
     group: root
-    mode: 0644
+    mode: "0644"
   notify:
     - Restart k3s-master
 

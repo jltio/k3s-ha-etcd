@@ -11,7 +11,7 @@
       dest: /tmp/kubernetes-server-linux-amd64.tar.gz
       owner: root
       group: root
-      mode: 0755
+      mode: "0755"
 
   - name: Extract archive
     unarchive:
@@ -38,8 +38,7 @@
 
   # TODO: Clean
 
-  when:
-    - check_k8s_version.stdout != k8s_version
+  when: check_k8s_version.stdout != k8s_version
 
 - name: Create /etc/kubernetes directory
   file:

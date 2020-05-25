@@ -1,7 +1,6 @@
 ---
 - hosts:
     - k3s_nodes
-
   tasks:
   - name: Stop services
     systemd:
@@ -10,6 +9,7 @@
     loop:
       - docker
       - k3s-node
+      - kubelet
 
   - name: Delete data
     file:
@@ -18,10 +18,11 @@
     loop:
       - /etc/rancher
       - /var/lib/rancher
+      - /etc/kubernetes
+      - /var/lib/kubelet
 
 - hosts:
     - k3s_masters
-
   tasks:
   - name: Stop services
     systemd:
@@ -45,7 +46,6 @@
 
 - hosts:
     - etcd
-
   tasks:
   - name: Stop services
     systemd:
@@ -62,4 +62,3 @@
       - /etc/ssl/etcd
       - /etc/etcd
       - /var/lib/etcd
-

@@ -3,7 +3,7 @@
   get_url:
     url: "{{ etcd_url }}/v{{ etcd_version }}/etcd-v{{ etcd_version }}-linux-amd64.tar.gz"
     dest: /tmp/etcd-v{{ etcd_version }}-linux-amd64.tar.gz
-    mode: 0444
+    mode: "0444"
 
 - name: Extract etcd
   unarchive:

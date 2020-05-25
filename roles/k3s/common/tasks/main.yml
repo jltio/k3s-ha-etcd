@@ -5,7 +5,7 @@
     dest: /usr/local/bin/k3s
     owner: root
     group: root
-    mode: 0755
+    mode: "0755"
 
 - name: Create kubectl symlink
   file:
@@ -19,7 +19,7 @@
     state: directory
     owner: root
     group: root
-    mode: 0755
+    mode: "0755"
   loop:
     - /var/lib/rancher
     - /etc/rancher
