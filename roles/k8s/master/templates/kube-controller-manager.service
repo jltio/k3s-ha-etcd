@@ -16,7 +16,9 @@ ExecStart=/usr/local/bin/kube-controller-manager \
           --requestheader-client-ca-file=/etc/kubernetes/pki/front-proxy-ca.crt \
           --root-ca-file=/etc/kubernetes/pki/ca.crt \
           --service-account-private-key-file=/etc/kubernetes/pki/sa.key \
-          --use-service-account-credentials=true
+          --tls-cert-file=/etc/kubernetes/pki/apiserver.crt \
+          --tls-private-key-file=/etc/kubernetes/pki/apiserver.key \
+          --use-service-account-credentials=true \
 Restart=on-failure
 RestartSec=5
 
