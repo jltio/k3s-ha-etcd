@@ -1,0 +1,13 @@
+---
+# Generation des fichiers configuration
+- name: Generate configuration files
+  shell: /usr/local/bin/kubeadm init phase kubeconfig {{ item }} --control-plane-endpoint 127.0.0.1:6443
+  args:
+    chdir: /etc/kubernetes
+    creates: /etc/kubernetes/{{ item }}.conf
+  loop:
+    - admin
+    - scheduler
+    - controller-manager
+  run_once: true
+  delegate_to: "{{ groups['k8s_masters'][0] }}"

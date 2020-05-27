@@ -5,7 +5,7 @@
 
 - hosts:
     - k8s_masters
-    - k8s_nodes
+    - k8s_workers
   roles:
     - k8s/common
 

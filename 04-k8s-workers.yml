@@ -1,0 +1,10 @@
+---
+# Uniquement pour le gathering
+- hosts:
+    - k8s_masters
+
+- hosts:
+    - k8s_workers
+  roles:
+    - docker
+    - k8s/worker

@@ -1,0 +1,51 @@
+---
+- name: Generate kubelet kubeconfig
+  shell: |
+    /usr/local/bin/kubectl config set-cluster kubernetes \
+    --kubeconfig=/etc/kubernetes/{{ inventory_hostname }}.conf \
+    --certificate-authority=/etc/kubernetes/pki/ca.crt \
+    --server=https://{{ hostvars[groups['k8s_masters'][0]].ansible_default_ipv4.address }}:6443 \
+    --embed-certs=true
+
+    /usr/local/bin/kubectl config set-credentials system:node:{{ inventory_hostname }} \
+    --kubeconfig=/etc/kubernetes/{{ inventory_hostname }}.conf \
+    --client-certificate=/etc/kubernetes/pki/{{ inventory_hostname }}.pem \
+    --client-key=/etc/kubernetes/pki/{{ inventory_hostname }}-key.pem \
+    --embed-certs=true
+
+    /usr/local/bin/kubectl config set-context system:node:{{ inventory_hostname }}@kubernetes \
+    --kubeconfig=/etc/kubernetes/{{ inventory_hostname }}.conf \
+    --cluster=kubernetes \
+    --user=system:node:{{ inventory_hostname }}
+
+    /usr/local/bin/kubectl config use-context system:node:{{ inventory_hostname }}@kubernetes \
+    --kubeconfig=/etc/kubernetes/{{ inventory_hostname }}.conf
+  args:
+    chdir: /etc/kubernetes
+    creates: /etc/kubernetes/kubelet.conf
+
+# - name: Generate token
+#   shell: /usr/local/bin/kubeadm token create --groups system:bootstrappers:{{ inventory_hostname }} 2> /dev/null
+#   register: kubelet_token
+#   delegate_to: "{{ groups['k8s_masters'][0] }}"
+
+# - name: Generate kubelet kubeconfig
+#   shell: |
+#     /usr/local/bin/kubectl config set-cluster bootstrap \
+#     --kubeconfig=/var/lib/kubelet/bootstrap-kubeconfig  \
+#     --server='https://{{ hostvars[groups['k8s_masters'][0]].ansible_default_ipv4.address }}:6443' \
+#     --certificate-authority=/etc/kubernetes/pki/ca.crt
+
+#     /usr/local/bin/kubectl config set-credentials kubelet-bootstrap \
+#     --kubeconfig=/var/lib/kubelet/bootstrap-kubeconfig  \
+#     --token={{ kubelet_token.stdout }}
+
+#     /usr/local/bin/kubectl config set-context bootstrap \
+#     --kubeconfig=/var/lib/kubelet/bootstrap-kubeconfig  \
+#     --user=kubelet-bootstrap --cluster=bootstrap
+
+#     /usr/local/bin/kubectl config use-context bootstrap \
+#     --kubeconfig=/var/lib/kubelet/bootstrap-kubeconfig
+#   args:
+#     chdir: /var/lib/kubelet
+#     creates: /var/lib/kubelet/bootstrap-kubeconfig

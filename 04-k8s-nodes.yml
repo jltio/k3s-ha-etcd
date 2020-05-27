@@ -1,6 +1,0 @@
----
-- hosts:
-    - k8s_nodes
-  roles:
-    - docker
-    - k8s/node

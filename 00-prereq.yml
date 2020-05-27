@@ -1,5 +1,5 @@
 ---
 - hosts:
-    - all
+    - all_servers
   roles:
     - centos

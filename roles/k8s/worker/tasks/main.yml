@@ -1,0 +1,25 @@
+---
+# - name: Install some packages
+#   yum:
+#     name:
+#       - ebtables
+#       - socat
+
+- name: Create directory
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  loop:
+    - /etc/kubernetes/manifests
+    - /var/lib/kubelet
+
+- include_tasks: 02-generate-certificate.yml
+
+- include_tasks: 03-sync-files.yml
+
+- include_tasks: 04-generate-configuration.yml
+
+- include_tasks: 04-kublet.yml

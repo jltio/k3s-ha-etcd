@@ -2,18 +2,20 @@
 - name: Disable SELinux
   selinux:
     state: disabled
+  register: selinux
 
-- name: Enable IPv4 and IPv6 forwarding/bridge-nf
-  sysctl:
-    name: "{{ item }}"
-    value: "1"
-    state: present
-    reload: yes
-  loop:
-    - net.ipv4.ip_forward
-    - net.ipv6.conf.all.forwarding
-    - net.bridge.bridge-nf-call-iptables
-    - net.bridge.bridge-nf-call-ip6tables
+# TODO
+# - name: Enable IPv4 and IPv6 forwarding/bridge-nf
+#   sysctl:
+#     name: "{{ item }}"
+#     value: "1"
+#     state: present
+#     reload: yes
+#   loop:
+#     - net.ipv4.ip_forward
+#     - net.ipv6.conf.all.forwarding
+#     - net.bridge.bridge-nf-call-iptables
+#     - net.bridge.bridge-nf-call-ip6tables
 
 - name: Add br_netfilter to /etc/modules-load.d/
   copy:
@@ -24,3 +26,17 @@
   modprobe:
     name: br_netfilter
     state: present
+
+- name: Reboot immediately if there was a change.
+  shell: "sleep 5 && reboot"
+  async: 1
+  poll: 0
+  when: selinux is changed
+
+- name: Wait for the reboot to complete if there was a change.
+  wait_for_connection:
+    connect_timeout: 20
+    sleep: 5
+    delay: 5
+    timeout: 300
+  when: selinux is changed

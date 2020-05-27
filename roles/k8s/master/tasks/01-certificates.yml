@@ -1,0 +1,45 @@
+---
+# Generation des certificats TLS
+# https://kubernetes.io/docs/setup/best-practices/certificates/
+- name: Generate CA certificats
+  shell: /usr/local/bin/kubeadm init phase certs {{ item }}
+  args:
+    chdir: /etc/kubernetes/pki
+    creates: /etc/kubernetes/pki/{{ item }}.key
+  loop:
+    - ca
+#   - front-proxy-ca
+  run_once: true
+  delegate_to: "{{ groups['k8s_masters'][0] }}"
+
+# - name: Generate clients certificats
+#   shell: /usr/local/bin/kubeadm init phase certs {{ item }}
+#   args:
+#     chdir: /etc/kubernetes/pki
+#     creates: /etc/kubernetes/pki/{{ item }}.key
+#   loop:
+#     - apiserver-kubelet-client
+#     - front-proxy-client
+#   run_once: true
+#   delegate_to: "{{ groups['k8s_masters'][0] }}"
+
+- name: Generate API certificat SANS
+  shell: /usr/local/bin/kubeadm init phase certs {{ item }} \
+         --apiserver-cert-extra-sans {{ certificat_apiserver_extra_sans | trim(",") }},{{ haproxy_vip }},127.0.0.1
+  args:
+    chdir: /etc/kubernetes/pki
+    creates: /etc/kubernetes/pki/{{ item }}.key
+  loop:
+    - apiserver
+  run_once: true
+  delegate_to: "{{ groups['k8s_masters'][0] }}"
+
+- name: Generate service account certificats
+  shell: /usr/local/bin/kubeadm init phase certs {{ item }}
+  args:
+    chdir: /etc/kubernetes/pki
+    creates: /etc/kubernetes/pki/{{ item }}.key
+  loop:
+    - sa
+  run_once: true
+  delegate_to: "{{ groups['k8s_masters'][0] }}"

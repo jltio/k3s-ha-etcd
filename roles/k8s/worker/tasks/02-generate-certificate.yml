@@ -1,0 +1,18 @@
+---
+- name: Copy CSR Worker in first master for sign
+  template:
+    src: worker-csr.json
+    dest: /etc/kubernetes/pki/{{ inventory_hostname }}-csr.json
+  delegate_to: "{{ groups['k8s_masters'][0] }}"
+
+- name: Sign CSR by CA
+  shell: /usr/local/bin/cfssl gencert \
+         -config=/etc/ssl/etcd/config.json \
+         -ca=/etc/kubernetes/pki/ca.crt \
+         -ca-key=/etc/kubernetes/pki/ca.key \
+         -profile=etcd
+         {{ inventory_hostname }}-csr.json | /usr/local/bin/cfssljson -bare {{ inventory_hostname }}
+  args:
+    chdir: /etc/kubernetes/pki
+    creates: /etc/kubernetes/pki/{{ inventory_hostname }}-key.pem
+  delegate_to: "{{ groups['k8s_masters'][0] }}"

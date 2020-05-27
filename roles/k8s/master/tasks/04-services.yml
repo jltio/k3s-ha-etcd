@@ -1,0 +1,45 @@
+---
+- name: Copy services file
+  template:
+    src: "{{ item }}.service"
+    dest: /etc/systemd/system/{{ item }}.service
+    owner: root
+    group: root
+    mode: 0644
+  loop:
+    - kube-apiserver
+    - kube-scheduler
+    - kube-controller-manager
+  notify:
+    - Restart kube-apiserver
+    - Restart kube-scheduler
+    - Restart kube-controller-manager
+
+- name: Reload systemd
+  systemd:
+    daemon_reload: yes
+
+- name: Enable and start kubernetes services (cluster init)
+  systemd:
+    name: "{{ item }}"
+    state: started
+    enabled: yes
+  loop:
+    - kube-apiserver
+  run_once: true
+  delegate_to: "{{ groups['k8s_masters'][0] }}"
+
+- name: Waiting API is UP
+  wait_for:
+    host: "{{ hostvars[groups['k8s_masters'][0]].ansible_default_ipv4.address }}"
+    port: 6443
+
+- name: Enable and start kubernetes services (all servers)
+  systemd:
+    name: "{{ item }}"
+    state: started
+    enabled: yes
+  loop:
+    - kube-apiserver
+    - kube-scheduler
+    - kube-controller-manager
