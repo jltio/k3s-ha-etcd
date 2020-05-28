@@ -1,6 +1,0 @@
----
-k8s_version: v1.17.6
-
-etcd_cluster_urls: "{% for host in groups.etcd %}https://{{ hostvars[host].ansible_default_ipv4.address }}:2379,{% endfor %}"
-
-certificat_apiserver_extra_sans: "{% for host in groups.k8s_masters %}{{ hostvars[host].ansible_default_ipv4.address }},{% endfor %}"

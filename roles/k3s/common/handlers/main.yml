@@ -4,7 +4,7 @@
     name: k3s-master
     state: restarted
 
-- name: Restart k3s-node
+- name: Restart k3s-worker
   service:
-    name: k3s-node
+    name: k3s-worker
     state: restarted

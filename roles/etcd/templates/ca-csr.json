@@ -6,9 +6,7 @@
     },
     "names": [
         {
-            "C": "FR",
-            "ST": "HDF",
-            "L": "LILLE"
+            "O": "etcd"
         }
     ]
 }

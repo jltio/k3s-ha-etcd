@@ -38,7 +38,7 @@ Dans ce code, 8 serveurs sont utilisés avec les caratéristiques suivantes:
 
 Après installation du cluster, les POD disponibles seront:
 
-* coredns
+* CoreDNS (TODO)
 * Traefik Ingress Controler (TODO)
 
 Dans k3s, la gestion des certificats TLS se gère automatiquement.
@@ -94,6 +94,10 @@ Si on souhaite tout supprimer pour repartir de zéro
 ```bash
 ansible-playbook 99-delete-data.yml
 ```
+
+## Installation de CoreDNS
+
+TODO
 
 ## Installation de Traefik
 

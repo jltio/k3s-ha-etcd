@@ -1,6 +1,6 @@
 ---
 - hosts:
-    - k3s_nodes
+    - k3s_workers
   tasks:
   - name: Stop services
     systemd:
@@ -8,8 +8,7 @@
       state: stopped
     loop:
       - docker
-      - k3s-node
-      - kubelet
+      - k3s-worker
 
   - name: Delete data
     file:
@@ -18,8 +17,6 @@
     loop:
       - /etc/rancher
       - /var/lib/rancher
-      - /etc/kubernetes
-      - /var/lib/kubelet
 
 - hosts:
     - k3s_masters
@@ -30,9 +27,6 @@
       state: stopped
     loop:
       - k3s-master
-      - kube-apiserver
-      - kube-scheduler
-      - kube-controller-manager
 
   - name: Delete data
     file:
@@ -41,8 +35,6 @@
     loop:
       - /etc/rancher
       - /var/lib/rancher
-      - /etc/kubernetes
-      - /var/lib/kubelet
 
 - hosts:
     - etcd

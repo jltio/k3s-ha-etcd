@@ -16,20 +16,20 @@
 
 - name: Copy k3s service file
   template:
-    src: k3s-node.service
-    dest: /etc/systemd/system/k3s-node.service
+    src: k3s-worker.service
+    dest: /etc/systemd/system/k3s-worker.service
     owner: root
     group: root
     mode: "0644"
   notify:
-    - Restart k3s-node
+    - Restart k3s-worker
 
 - name: Reload systemd
   systemd:
     daemon_reload: yes
 
-- name: Enable and start k3s-node service
+- name: Enable and start k3s-worker service
   systemd:
-    name: k3s-node
+    name: k3s-worker
     state: started
     enabled: yes
