@@ -86,7 +86,7 @@ ansible-playbook 03-haproxy.yml
 Installer les nodes worker k3s
 
 ```bash
-ansible-playbook 04-k3s-nodes.yml
+ansible-playbook 04-k3s-workers.yml
 ```
 
 Si on souhaite tout supprimer pour repartir de zéro
